@@ -106,9 +106,11 @@ function init() {
   texture.wrapT = THREE.RepeatWrapping;
   mesh = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), 
   	new THREE.MeshBasicMaterial({map: texture}))
+
   mesh.rotation.x = -Math.PI / 2;
     mesh.rotation.z	= -Math.PI / 2;
   scene.add(mesh);
+
   ball = new THREE.Mesh (new THREE.SphereGeometry(1,20,20), new THREE.MeshPhongMaterial({color: 0x0A0200}));
   
 target= new THREE.Mesh (new THREE.BoxGeometry (15,40,15), new THREE.MeshPhongMaterial({map: loader.load('https://i.imgur.com/D6K1eqp.jpg')}));

@@ -1,0 +1,788 @@
+<html>
+	<head>
+	
+		<style>
+		#info {
+  position: absolute;
+  top: 20%;
+  width: 90%;
+  padding: 10px;
+  text-align: right;
+  color: #ffff00
+}
+
+body {
+  overflow: hidden;
+}
+
+}
+
+		</style>
+	</head>
+	<body>
+	 <br>
+
+<script src="https://threejs.org/build/three.min.js"></script>
+ <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+ <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+ <script src="https://raw.githack.com/mrdoob/three.js/dev/examples/js/loaders/MTLLoader.js"></script>
+ <script src="https://raw.githack.com/mrdoob/three.js/dev/examples/js/loaders/OBJLoader.js"></script>
+<script type="x-shader/x-fragment" id="fragmentShaderDepth">
+    uniform sampler2D texture;
+    varying vec2 vUv;
+
+    vec4 pack_depth(const in float depth) {
+        const vec4 bit_shift = vec4(256.0 * 256.0 * 256.0, 256.0 * 256.0, 256.0, 1.0);
+        const vec4 bit_mask = vec4(0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0);
+        vec4 res = fract(depth * bit_shift);
+        res -= res.xxyz * bit_mask;
+        return res;
+    }
+
+    void main() {
+        vec4 pixel = texture2D(texture, vUv);
+        if (pixel.a < 0.5) discard;
+        gl_FragData[0] = pack_depth (gl_FragCoord.z);
+    }
+</script>
+<script type="x-shader/x-vertex" id="vertexShaderDepth">
+    varying vec2 vUv;
+
+    void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+</script>
+  <script>
+  
+
+ var scene, renderer, camera;
+var mouse = new THREE.Vector2();
+var turn=false;
+var lights=[];
+var cube,sphere;
+ var ambientLight,t=2;
+ class Light {
+	constructor (mesh,) {
+  	this.mesh = mesh;
+    scene.add (this.mesh); 
+
+  }
+  setup(mesh2){
+  this.mesh.target=mesh2;
+  }
+  update () {
+  	this.mesh.visible=!this.mesh.visible;
+	if(	this.mesh.visible)
+	t++;
+	else
+	t--;
+	
+	if(	this.mesh.visible)
+		return 'white';
+		else
+		return 'red';
+  }
+}
+init();
+animate();
+
+function init() {
+ scene = new THREE.Scene();
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+  document.body.appendChild(renderer.domElement);
+
+ camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+  camera.position.y = 180;
+  camera.position.z = 300;
+  camera.position.x = -100;
+
+  let controls = new THREE.OrbitControls(camera, renderer.domElement);
+camera.lookAt(0,0,0);
+objects = new THREE.Group();
+  
+   cube = new THREE.Mesh (new THREE.BoxGeometry(3,1.5,3), new THREE.MeshPhongMaterial());
+  cube.name = 'cube'
+  cube.position.set (-60,42.5,20)
+ 
+	 sphere = new THREE.Mesh (new THREE.BoxGeometry(5,5,2), new THREE.MeshPhongMaterial())
+  sphere.name = 'sphere'
+  sphere.position.set (-150,70,5)
+	objects.add (cube, sphere);
+  scene.add (objects);
+	
+  pickables = [ objects ];
+
+  raycaster = new THREE.Raycaster();
+  document.addEventListener('mousedown', onDocumentMouseDown, false);
+  document.addEventListener('mousemove', onDocumentMouseOver, false);
+  var spotLight = new THREE.SpotLight(0xffffff);
+
+ spotLight.shadow.mapSize.width = 1024;
+  spotLight.shadow.mapSize.height = 1024;
+
+	   spotLight.position.set(-200, 100, 200);
+	   
+	   spotLight.castShadow=true;
+   lights.push (new Light (spotLight.clone()));
+      var mesh2 = new THREE.Mesh(new THREE.TorusKnotGeometry(0, 0, 0, 0),
+    new THREE.MeshLambertMaterial({color:0xffef12}));
+scene.add(mesh2);
+mesh2.position.set(-60,40,40);
+  var spotLight2 = new THREE.SpotLight(0xaaaaaa);
+ spotLight2.shadow.mapSize.width = 1024;
+  spotLight2.shadow.mapSize.height = 1024;
+
+   spotLight2.position.set(-60, 75, 28);
+   spotLight2.castShadow=true;
+ lights.push (new Light (spotLight2.clone(),mesh2));
+ lights[1].setup(mesh2);
+  let sphereSize = 5;
+  let pointLightHelper = new THREE.PointLightHelper(spotLight2, sphereSize);
+  scene.add(pointLightHelper);
+
+  ambientLight = new THREE.AmbientLight(0x888888);
+  scene.add(ambientLight);
+ 
+ 
+  renderer.shadowMap.enabled = true;
+  
+  // ocludee: floor
+
+
+  var floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400),
+    new THREE.MeshLambertMaterial({
+ color: 0xFFEBCB
+
+   
+  }));
+  floor.position.x=-200;
+    floor.position.z=200;
+  floor.rotation.x = -Math.PI / 2;
+  scene.add(floor);
+ let tea=Teamodel(-20,42.5,50);
+  scene.add(tea);
+   tea.castShadow = true
+  tea.receiveShadow = true
+   let penhold=penHolder(-100,42.5,15);
+   scene.add(penhold);
+ 
+let wall=Wall();
+   scene.add(wall);
+ let table=Table(0,0);
+ scene.add(table);
+  floor.receiveShadow = true;
+ 
+ 
+ var onProgress=function(xhr){
+if(xhr.lengthComputable){
+var percentComplete=xhr.loaded/xhr.total*100;
+console.log(Math.round(percentComplete,2)+'% downloaded');
+}
+};
+var onError=function(xhr){};
+ 
+
+  var mtlLoader = new THREE.MTLLoader();
+mtlLoader.setPath('model/');
+mtlLoader.load('WoodChair_01.mtl', function(materials) {
+  materials.preload();
+  var objLoader = new THREE.OBJLoader();
+  objLoader.setMaterials(materials);
+  objLoader.setPath('model/');
+  objLoader.load('WoodChair_01.obj', function(object) {
+  object.traverse( function ( object ) {
+            if ( object instanceof THREE.Mesh ) {
+              object.castShadow = true;
+   object.receiveShadow = true
+            }
+          });
+
+    var theObject =  unitize (object, 60);
+theObject.position.x=-100;
+theObject.position.z=100;
+theObject.position.y=30;
+theObject.rotation.x=-Math.PI/2;
+theObject.rotation.z=-Math.PI/2;
+
+    scene.add (theObject);
+
+
+  }, onProgress, onError);
+
+});
+var mtlLoader = new THREE.MTLLoader();
+mtlLoader.setPath('model/');
+mtlLoader.load('Desk lamp.mtl', function(materials) {
+  materials.preload();
+  var objLoader = new THREE.OBJLoader();
+  objLoader.setMaterials(materials);
+  objLoader.setPath('model/');
+  objLoader.load('Desk lamp.obj', function(object) {
+  object.traverse( function ( object ) {
+            if ( object instanceof THREE.Mesh ) {
+              object.castShadow = true;
+   object.receiveShadow = true
+            }
+          });
+
+    var theObject =  unitize (object, 40);
+theObject.position.x=-60;
+theObject.position.z=20;
+theObject.position.y=42;
+theObject.rotation.y=-Math.PI/2;
+
+    scene.add (theObject);
+
+
+  }, onProgress, onError);
+
+});
+var mtlLoader = new THREE.MTLLoader();
+mtlLoader.setPath('model/');
+mtlLoader.load('Fountain pen.mtl', function(materials) {
+  materials.preload();
+  var objLoader = new THREE.OBJLoader();
+  objLoader.setMaterials(materials);
+  objLoader.setPath('model/');
+  objLoader.load('Fountain pen.obj', function(object) {
+  object.traverse( function ( object ) {
+            if ( object instanceof THREE.Mesh ) {
+              object.castShadow = true;
+   object.receiveShadow = true
+            }
+          });
+
+    var theObject =  unitize (object, 20);
+theObject.position.x=-98;
+theObject.position.z=16;
+theObject.position.y=52.5;
+theObject.rotation.z=-Math.PI/180*75;
+theObject.rotation.x=-Math.PI;
+    scene.add (theObject);
+
+
+  }, onProgress, onError);
+
+});
+var mtlLoader = new THREE.MTLLoader();
+mtlLoader.setPath('model/');
+mtlLoader.load('Pen_01.mtl', function(materials) {
+  materials.preload();
+  var objLoader = new THREE.OBJLoader();
+  objLoader.setMaterials(materials);
+  objLoader.setPath('model/');
+  objLoader.load('Pen_01.obj', function(object) {
+  object.traverse( function ( object ) {
+            if ( object instanceof THREE.Mesh ) {
+              object.castShadow = true;
+   object.receiveShadow = true
+            }
+          });
+
+    var theObject =  unitize (object, 20);
+theObject.position.x=-100;
+theObject.position.z=15;
+theObject.position.y=42;
+theObject.rotation.x=-Math.PI/180*16;
+theObject.rotation.y=-Math.PI/2;
+
+    scene.add (theObject);
+
+
+  }, onProgress, onError);
+
+});
+
+
+  window.addEventListener('resize', onWindowResize, false);
+
+  //////////////////////////////////////////////////////////
+ 
+
+}
+function onDocumentMouseDown(event) {
+
+  // PICKING DETAILS: 
+  // convert mouse.xy = [-1,1]^2 (NDC)
+  // unproject (mouse.xy, 1) to a point on the far plane (in world coordinate)
+  // set raycaster (origin, direction)
+  // find intersection objects, (closest first) 
+  // each record as
+  // [ { distance, point, face, faceIndex, object }, ... ]
+
+	//  event.preventDefault();  // may not be necessary
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  // find intersections
+  raycaster.setFromCamera(mouse, camera);
+  var intersects = raycaster.intersectObjects(pickables, true);
+  if (intersects.length > 0) {
+if(intersects[0].object.name=='cube')
+   intersects[0].object.material.emissive = new THREE.Color(lights[1].update());		
+		else
+		 intersects[0].object.material.emissive = new THREE.Color(lights[0].update());
+		 if(t==0)
+	  ambientLight.intensity=0;
+	 else if(t==1)
+	   ambientLight.intensity=0.5;
+	   else
+	        ambientLight.intensity=1;
+  }
+  
+
+}
+
+function onDocumentMouseOver(event) {
+	event.preventDefault();  // may not be necessary
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  // find intersections
+  raycaster.setFromCamera(mouse, camera);
+  var intersects = raycaster.intersectObjects(pickables, true);
+  if (intersects.length > 0) {
+    document.body.style.cursor = 'pointer';
+  } else {
+    document.body.style.cursor = 'auto';
+  }
+
+}
+
+function unitize (object, targetSize) {  
+ 
+  // find bounding box of 'object'
+  var box3 = new THREE.Box3();
+  box3.setFromObject (object);
+  var size = new THREE.Vector3();
+  size.subVectors (box3.max, box3.min);
+
+  var center = new THREE.Vector3();
+  center.addVectors(box3.max, box3.min).multiplyScalar (0.5);
+
+
+  // uniform scaling according to objSize
+  var objSize = Math.max (size.x, size.y, size.z); 
+  var scaleSet = targetSize/objSize;
+ var theObject =  new THREE.Object3D();
+  theObject.add (object);
+  object.scale.set (scaleSet, scaleSet, scaleSet);
+  object.position.set (-center.x*scaleSet, -center.y*scaleSet + size.y/2*scaleSet, -center.z*scaleSet);
+  
+  return theObject;
+}
+
+function Table(x,z){
+var back1 = new THREE.BoxGeometry(140, 70, 5);
+ var left1 = new THREE.BoxGeometry(70, 40, 5);
+ var back= new THREE.Mesh(back1, new THREE.MeshLambertMaterial({
+color:0x785021
+  }));
+  var left= new THREE.Mesh(left1, new THREE.MeshLambertMaterial({
+color:0x785021
+  }));
+back.rotation.x=Math.PI/2;
+back.position.y=40;
+back.position.x=x-70;
+back.position.z=z+40;
+left.rotation.y=Math.PI/2;
+left.position.y=20;
+left.position.x=x-140+2.5;
+left.position.z=z+40;
+  back.castShadow = true
+   back.receiveShadow = true
+     left.castShadow = true
+   left.receiveShadow = true
+var group = new THREE.Group();
+group.add(back,left);
+return group;
+}
+function Wall(){
+var front1 = new THREE.BoxGeometry(400, 200, 10);
+ var right1 = new THREE.BoxGeometry(400, 200, 10);
+ var front= new THREE.Mesh(front1, new THREE.MeshLambertMaterial({
+color:0x80E2FF
+  }));
+  var right= new THREE.Mesh(right1, new THREE.MeshLambertMaterial({
+color:0x80E2FF
+  }));
+  front.position.x=-200;
+ front.position.z=0;
+   front.position.y=100
+   right.position.z=200;
+  right.position.x=0;
+    right.position.y=100
+ right.rotation.y=Math.PI/2;
+  front.receiveShadow = true
+   right.receiveShadow = true
+var group = new THREE.Group();
+group.add(front,right);
+return group;
+}
+function penHolder(x,y,z){
+
+var front = new THREE.BoxGeometry(10, 14, 0.5);
+ var back = new THREE.BoxGeometry(10, 14, 0.5);
+  var right = new THREE.BoxGeometry(10, 14, 0.5);
+ var left = new THREE.BoxGeometry(10, 14, 0.5);
+var base= new THREE.BoxGeometry(10, 0.2, 10);
+  var loader = new THREE.TextureLoader();
+	var colorMap = loader.load('picture/test3.png');
+  var material = new THREE.MeshLambertMaterial({
+  map:colorMap,
+
+  
+    transparent: true,
+    side: THREE.DoubleSide
+
+  });
+
+  frontMesh = new THREE.Mesh(front, material);
+  frontMesh.position.x=x;
+  frontMesh.position.y=7.1+y;
+   frontMesh.position.z=4.75+z;
+   
+  backMesh = new THREE.Mesh(back, material);
+  backMesh.position.x=x;
+  backMesh.position.y=7.1+y;
+   backMesh.position.z=-4.75+z;
+   backMesh.rotation.y=Math.PI;
+    rightMesh = new THREE.Mesh(right, material);
+	rightMesh.position.y=7.1+y;
+   rightMesh.position.x=4.75+x;
+   rightMesh.position.z=z;
+   rightMesh.rotation.y=Math.PI/2;
+	 leftMesh = new THREE.Mesh(left, material);
+	 leftMesh.position.y=7.1+y;
+   leftMesh.position.x=-4.75+x;
+   leftMesh.position.z=z;
+   leftMesh.rotation.y=Math.PI/2;
+  baseMesh= new THREE.Mesh(base, new THREE.MeshLambertMaterial({
+color:0x80E2FF
+  }));
+  baseMesh.position.y=0.1+y;
+   baseMesh.position.x=x;
+    baseMesh.position.z=z;
+    backMesh.castShadow = true
+   backMesh.receiveShadow = true
+     rightMesh.castShadow = true
+   rightMesh.receiveShadow = true
+     leftMesh.castShadow = true
+   leftMesh.receiveShadow = true
+   
+     frontMesh.castShadow = true
+   frontMesh.receiveShadow = true
+    baseMesh.castShadow = true
+   baseMesh.receiveShadow = true
+   var uniforms = {
+        texture: {
+            type: "t",
+            value: colorMap
+        }
+      };
+  var vertexShader = document.getElementById('vertexShaderDepth').textContent;
+  var fragmentShader = document.getElementById('fragmentShaderDepth').textContent;
+  baseMesh.customDepthMaterial = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader
+    });
+	frontMesh.customDepthMaterial = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader
+    });
+	leftMesh.customDepthMaterial = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader
+    });
+	rightMesh.customDepthMaterial = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader
+    });
+	backMesh.customDepthMaterial = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader
+    });
+	var group = new THREE.Group();
+group.add(frontMesh );
+group.add(backMesh );
+group.add(rightMesh );
+group.add(leftMesh );
+group.add( baseMesh );
+ 
+return group;
+
+}
+function Teamodel( x , y , z) {
+  var geometry = new THREE.Geometry();
+  geometry.vertices.push(
+    new THREE.Vector3(-3.5+x, 0+y, 3.5+z),
+    new THREE.Vector3(3.5+x, 0+y, 3.5+z),
+    new THREE.Vector3(-3.5+x, 0+y, -3.5+z),
+    new THREE.Vector3(3.5+x, 0+y, -3.5+z),
+	
+   new THREE.Vector3(-3.5+x, 10+y, 3.5+z),
+    new THREE.Vector3(3.5+x, 10+y, 3.5+z),
+    new THREE.Vector3(-3.5+x, 10+y, -3.5+z),
+    new THREE.Vector3(3.5+x, 10+y, -3.5+z),
+	
+	new THREE.Vector3(-3.5+x, 12.5+y, 0.1+z),
+    new THREE.Vector3(3.5+x, 12.5+y, 0.1+z),
+    new THREE.Vector3(-3.5+x, 12.5+y, -0.1+z),
+    new THREE.Vector3(3.5+x, 12.5+y, -0.1+z),
+	
+	new THREE.Vector3(-3.5+x, 14+y, 0.1+z),
+    new THREE.Vector3(3.5+x, 14+y, 0.1+z),
+    new THREE.Vector3(-3.5+x, 14+y, -0.1+z),
+    new THREE.Vector3(3.5+x, 14+y, -0.1+z),
+	
+	new THREE.Vector3(-1+x, 12.5+y, 0+z),
+    new THREE.Vector3(1+x, 12.5+y, 0+z),
+  
+  );
+
+  var face;
+  //底
+  face = new THREE.Face3(0, 2, 1); face.materialIndex = 0;
+  geometry.faces.push(face);
+  face = new THREE.Face3(1, 2, 3); face.materialIndex =0;
+  geometry.faces.push(face);
+  //前
+  face = new THREE.Face3(0, 5, 4);
+  geometry.faces.push(face);
+  face = new THREE.Face3(0, 1, 5); 
+  geometry.faces.push(face);
+  //右
+  face = new THREE.Face3(1, 7, 5);
+  geometry.faces.push(face);
+  face = new THREE.Face3(1, 3, 7); 
+  geometry.faces.push(face);
+  //後
+  face = new THREE.Face3(2, 7,3); 
+  geometry.faces.push(face);
+  face = new THREE.Face3(2, 6, 7);
+  geometry.faces.push(face);
+  //左
+face = new THREE.Face3(2, 4, 6);
+  geometry.faces.push(face);
+  face = new THREE.Face3(2, 0, 4); 
+  geometry.faces.push(face);
+  //前上
+ face = new THREE.Face3(4, 5, 8); 
+  geometry.faces.push(face);
+  face = new THREE.Face3(5, 9, 8);
+   geometry.faces.push(face);
+   //後上
+    face = new THREE.Face3(11, 7, 6); 
+  geometry.faces.push(face);
+  face = new THREE.Face3(6, 10, 11); 
+   geometry.faces.push(face);  
+   //前拔手
+   face = new THREE.Face3(8, 13, 12);
+  geometry.faces.push(face);
+  face = new THREE.Face3(8, 9, 13);
+   geometry.faces.push(face);
+   //後拔手
+    face = new THREE.Face3(10, 14, 15);
+  geometry.faces.push(face);
+  face = new THREE.Face3(11, 10, 15);
+  geometry.faces.push(face);
+  
+  //上拔手
+  face = new THREE.Face3(12, 15, 14);
+  geometry.faces.push(face);
+  face = new THREE.Face3(12, 13, 15); 
+  geometry.faces.push(face);
+  //右拔手
+  face = new THREE.Face3(9, 15, 13); 
+  geometry.faces.push(face);
+  face = new THREE.Face3(11, 15, 9); 
+  geometry.faces.push(face);
+   //左拔手
+  face = new THREE.Face3(8, 12, 14); 
+  geometry.faces.push(face);
+  face = new THREE.Face3(10, 8, 14); 
+   geometry.faces.push(face);
+   //右上
+   //中
+  face = new THREE.Face3(5, 7, 17); 
+  geometry.faces.push(face);
+  //右
+    face = new THREE.Face3(11, 17, 7); 
+  geometry.faces.push(face);
+  //左
+    face = new THREE.Face3(9, 5, 17);
+  geometry.faces.push(face);
+  //左上
+  //中
+    face = new THREE.Face3(6, 4, 16); 
+  geometry.faces.push(face); 
+  //右
+   face = new THREE.Face3(8, 16, 4); 
+  geometry.faces.push(face);
+  //左
+    face = new THREE.Face3(10, 6, 16);
+  geometry.faces.push(face);
+  
+ var  loader = new THREE.TextureLoader().load('picture/tea.jpg');
+ 
+   var material = new THREE.MeshLambertMaterial({
+    map:loader
+	
+  })
+
+   geometry.faceVertexUvs[0].push([new THREE.Vector2(1, 1), new THREE.Vector2(1, 1), new THREE.Vector2(1, 1)]);
+  geometry.faceVertexUvs[0].push([new THREE.Vector2(1, 1), new THREE.Vector2(1, 1), new THREE.Vector2(1, 1)]);
+  //前
+    var front = [ 
+  new THREE.Vector2(0, 0),
+    new THREE.Vector2(0, 10/15.6) , 
+    new THREE.Vector2(0.25, 0), 
+    new THREE.Vector2(0.25, 10/15.6), 
+    
+];
+  geometry.faceVertexUvs[0].push([front[0],front[3] ,front[1] ]);
+  geometry.faceVertexUvs[0].push([front[0],front[2] ,front[3] ]);
+  //右
+    var right = [ 
+  new THREE.Vector2(0.25, 0),
+    new THREE.Vector2(0.25, 10/15.6) , 
+    new THREE.Vector2(0.5, 0), 
+    new THREE.Vector2(0.5, 10/15.6), 
+    
+];
+	 geometry.faceVertexUvs[0].push([right[0],right[3] ,right[1] ]);
+  geometry.faceVertexUvs[0].push([right[0],right[2] ,right[3] ]);
+  //後
+    var back = [ 
+  new THREE.Vector2(0.5, 0),
+    new THREE.Vector2(0.5, 10/15.6) , 
+    new THREE.Vector2(0.75, 0), 
+    new THREE.Vector2(0.75, 10/15.6), 
+    
+];
+   geometry.faceVertexUvs[0].push([back[2],back[1] ,back[0] ]);
+  geometry.faceVertexUvs[0].push([back[2],back[3] ,back[1] ]);
+  //左
+  var left = [ 
+  new THREE.Vector2(0.75, 0),
+    new THREE.Vector2(0.75, 10/15.6) , 
+    new THREE.Vector2(1, 0), 
+    new THREE.Vector2(1, 10/15.6), 
+    
+];
+   geometry.faceVertexUvs[0].push([left[0],left[3] ,left[1] ]);
+  geometry.faceVertexUvs[0].push([left[0],left[2] ,left[3] ]);
+  //前上
+   var frontOn = [ 
+  new THREE.Vector2(0, 10/15.6),
+    new THREE.Vector2(0, 14.1/15.6) , 
+    new THREE.Vector2(0.25, 10/15.6), 
+    new THREE.Vector2(0.25, 14.1/15.6), 
+    
+];
+   geometry.faceVertexUvs[0].push([frontOn[0],frontOn[2] ,frontOn[1] ]);
+  geometry.faceVertexUvs[0].push([frontOn[2],frontOn[3] ,frontOn[1] ]);
+  //後上
+  var backOn = [ 
+  new THREE.Vector2(0.5, 10/15.6),
+    new THREE.Vector2(0.5, 14.1/15.6) , 
+    new THREE.Vector2(0.75, 10/15.6), 
+    new THREE.Vector2(0.75, 14.1/15.6), 
+    
+];
+   geometry.faceVertexUvs[0].push([backOn[1],backOn[0] ,backOn[2] ]);
+  geometry.faceVertexUvs[0].push([backOn[2],backOn[3] ,backOn[1] ]);
+  //前拔手
+   var frontPullHand = [ 
+  new THREE.Vector2(0, 14.1/15.6),
+    new THREE.Vector2(0, 1) , 
+    new THREE.Vector2(0.25, 14.1/15.6), 
+    new THREE.Vector2(0.25,1), 
+    
+];
+  geometry.faceVertexUvs[0].push([frontPullHand[0],frontPullHand[3] ,frontPullHand[1] ]);
+  geometry.faceVertexUvs[0].push([frontPullHand[0],frontPullHand[2] ,frontPullHand[3] ]);
+  //後拔手
+   var backPullHand = [ 
+  new THREE.Vector2(0.5, 14.1/15.6),
+    new THREE.Vector2(0.5, 1) , 
+    new THREE.Vector2(0.75, 14.1/15.6), 
+    new THREE.Vector2(0.75,1), 
+    
+];
+  geometry.faceVertexUvs[0].push([backPullHand[2],backPullHand[3] ,backPullHand[1] ]);
+  geometry.faceVertexUvs[0].push([backPullHand[0],backPullHand[2] ,backPullHand[1] ]);
+  //上拔手
+   geometry.faceVertexUvs[0].push([new THREE.Vector2(1, 1), new THREE.Vector2(1, 1), new THREE.Vector2(1, 1)]);
+  geometry.faceVertexUvs[0].push([new THREE.Vector2(1, 1), new THREE.Vector2(1, 1), new THREE.Vector2(1, 1)]);
+  //右拔手
+   geometry.faceVertexUvs[0].push([new THREE.Vector2(1, 1), new THREE.Vector2(1, 1), new THREE.Vector2(1, 1)]);
+  geometry.faceVertexUvs[0].push([new THREE.Vector2(1, 1), new THREE.Vector2(1, 1), new THREE.Vector2(1, 1)]);
+  //左拔手
+   geometry.faceVertexUvs[0].push([new THREE.Vector2(1, 1), new THREE.Vector2(1, 1), new THREE.Vector2(1, 1)]);
+  geometry.faceVertexUvs[0].push([new THREE.Vector2(1, 1), new THREE.Vector2(1, 1), new THREE.Vector2(1, 1)]);
+  //右上
+   var rightOn = [ 
+  new THREE.Vector2(0.25, 10/15.6),
+    new THREE.Vector2(0.25, 14.1/15.6) , 
+    new THREE.Vector2(0.5, 10/15.6), 
+    new THREE.Vector2(0.5, 14.1/15.6), 
+	new THREE.Vector2(0.375, 14.1/15.6), 
+    
+];
+  //中
+   geometry.faceVertexUvs[0].push([rightOn[0],rightOn[2] ,rightOn[4] ]);
+   //右
+  geometry.faceVertexUvs[0].push([rightOn[3],rightOn[4] ,rightOn[2] ]);
+  //左
+   geometry.faceVertexUvs[0].push([rightOn[1],rightOn[0] ,rightOn[4] ]);
+   //左上
+   var leftOn = [ 
+  new THREE.Vector2(0.75, 10/15.6),
+    new THREE.Vector2(0.75, 14.1/15.6) , 
+    new THREE.Vector2(1, 10/15.6), 
+    new THREE.Vector2(1, 14.1/15.6), 
+	new THREE.Vector2(0.875, 14.1/15.6), 
+    
+];
+   //中
+  geometry.faceVertexUvs[0].push([leftOn[0] ,leftOn[2], leftOn[4]]);
+  //右
+   geometry.faceVertexUvs[0].push([leftOn[3], leftOn[4], leftOn[2]]);
+   //左
+  geometry.faceVertexUvs[0].push([leftOn[1], leftOn[0], leftOn[4]]);
+  
+  
+	geometry.computeFaceNormals();
+  geometry.computeVertexNormals();
+ 
+	cube = new THREE.Mesh(geometry, material);
+return cube;
+ 
+}
+function animate() {
+
+requestAnimationFrame(animate);
+  render();
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function render() {
+  renderer.render(scene, camera);
+}
+</script>
+	</body>
+</html>
