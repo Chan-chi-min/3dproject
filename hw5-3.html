@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+#info {
+  position: absolute;
+  top: 2%;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
+}
+
+body {
+  overflow: hidden;
+}
+</style>
+</head>
+
+<body> 
+<div id="info">
+Homework 5-3<br>
+<p id = 'msg'>
+</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/109/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://raw.githack.com/mrdoob/three.js/dev/examples/js/geometries/TeapotBufferGeometry.js"></script>
+</script>
+    <script id="myVertexShader" type="x-shader/x-vertex">
+	uniform vec3 lightpos;
+	varying float ndotl;
+  varying vec3 lightdir;
+  varying vec3 eyenorm;
+  varying vec2 vUv;
+
+    
+    varying vec4 eyepos;
+  void main() {
+		gl_Position = projectionMatrix* modelViewMatrix * vec4( position, 1.0);
+		vUv = uv;
+    
+	  //vec4 worldpos = modelMatrix * vec4 (position, 1.0);
+    //ndotl = dot (normalize(lightpos.xyz - worldpos.xyz), normal);
+    vec4 eyepos = modelViewMatrix * vec4 (position, 1.0);
+    vec4 lighteye = viewMatrix * vec4 (lightpos, 1.0);
+    lightdir = lighteye.xyz - eyepos.xyz;
+    eyenorm = normalMatrix * normal;
+  }
+</script>
+<script id="myFragmentShader" type="x-shader/x-fragment">
+	varying float ndotl;
+  varying vec3 lightdir;
+  varying vec3 eyenorm;
+  uniform sampler2D mytex;
+  varying vec2 vUv;
+   uniform float opacity;
+	void main() {
+		float nn = dot (normalize(lightdir), normalize(eyenorm));
+    if (nn > 0.8) {
+			nn= 1.0;
+		} else if (nn > 0.6) {
+			nn = 0.6;
+		} else {
+			nn = 0.2;
+		}
+		
+    vec4 texColor = texture2D (mytex, vUv);
+    //gl_FragColor = nn*texColor;
+    gl_FragColor = vec4 (nn,nn,nn, opacity);
+	}
+
+</script>
+
+<script>
+
+var scene, renderer, camera;
+var mouse = new THREE.Vector2();
+var pointLight;
+var angle = 0;
+var teapots = [];
+var pickables=[];
+var picktea=[];
+var i=0;
+class Teapot {
+	constructor (mesh,abc) {
+  	this.mesh = mesh;
+	this.abc=abc;
+    scene.add (this.mesh); 
+this.life=1;
+this.angle=0;
+this.run=true;
+  }
+  aaa(name){
+  if(this.mesh.name==name){
+ this.run=!this.run;
+ }
+  }
+
+ update (){
+ 
+ this.abc.uniforms.lightpos.value.copy (pointLight.position);
+ if(this.run){
+	 this.abc.uniforms.opacity.value = this.life;   
+	this.life-=0.0025;
+	 this.mesh.rotation.y=this.angle;
+this.angle+=this.life*0.1;
+}
+ }
+}
+init();
+animate();
+
+function init() {
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+
+    camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+    camera.position.set (0, 160, 400);
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+		renderer = new THREE.WebGLRenderer({
+        antialias: true
+    });
+    renderer.setSize(width, height);
+    document.body.appendChild(renderer.domElement);
+    renderer.setClearColor(0x888888);
+
+    scene = new THREE.Scene();
+    let controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    var gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
+    scene.add(gridXZ);
+
+    pointLight = new THREE.PointLight(0xffffff);
+    scene.add(pointLight);
+		scene.add (new THREE.PointLightHelper (pointLight, 5));
+    
+    var ambientLight = new THREE.AmbientLight(0x111111);
+    scene.add(ambientLight);
+//////////////////////////////////////////////////////////
+  var objects = new THREE.Group();
+ sphere = new THREE.Mesh (new THREE.BoxGeometry(200,0,200), new THREE.MeshPhongMaterial());
+  
+   cube = new THREE.Mesh (new THREE.BoxGeometry(50,30,200), new THREE.MeshPhongMaterial());
+cube.position.y+=15;
+
+
+	objects.add (sphere, cube);
+  scene.add (objects);
+	
+  pickables = [ objects ];
+    raycaster = new THREE.Raycaster();
+  document.addEventListener('mousedown', onDocumentMouseDown, false);
+  document.addEventListener('mousemove', onDocumentMouseOver, false);
+}
+function onDocumentMouseDown(event) {
+
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  // find intersections
+  raycaster.setFromCamera(mouse, camera);
+  var intersects = raycaster.intersectObjects(pickables, true);
+  if (intersects.length > 0) {
+
+picktea.length = 0;
+ teapots.forEach (function (b) {picktea.push(b.mesh)});
+    var intersects1 = raycaster.intersectObjects(picktea);
+console.log(picktea.length);
+   if (intersects1.length > 0) {
+   console.log("有");
+teapots.forEach (function (b) {b.aaa(intersects1[0].object.name)});
+
+   }
+   else{
+ 
+ var teapotMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+        lightpos: {type: 'v3', value: new THREE.Vector3()},
+        opacity: {type: 'f', value: 1.0}
+	},
+    vertexShader: document.getElementById('myVertexShader').textContent,
+    fragmentShader: document.getElementById('myFragmentShader').textContent
+  });
+   teapotMaterial.transparent = true;
+ var movingTeapot = new THREE.Mesh (new THREE.TeapotBufferGeometry(10), teapotMaterial);
+  movingTeapot.position.copy(intersects[0].point);
+  movingTeapot.position.y+=10
+movingTeapot.name=i;
+i++;
+ teapots.push (new Teapot (movingTeapot.clone(),teapotMaterial));
+
+
+
+
+
+	
+}
+  }
+  else{
+  
+
+ 
+}
+}
+function onDocumentMouseOver(event) {
+	event.preventDefault();  // may not be necessary
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  // find intersections
+  raycaster.setFromCamera(mouse, camera);
+  var intersects = raycaster.intersectObjects(pickables, true);
+  if (intersects.length > 0) {
+    document.body.style.cursor = 'pointer';
+  } else {
+    document.body.style.cursor = 'auto';
+  }
+
+}
+
+function animate() {
+    angle += 0.01;
+    pointLight.position.set(50 * Math.cos(angle), 80, 50 * Math.sin(angle));
+   
+   teapots.forEach (function (b,c) {b.update();
+   if(b.life<0){
+  scene.remove(b.mesh);
+    teapots.splice(c,1);
+
+}	});
+$('#msg').text ('茶壺數量: ' + '"' + teapots.length + '"')
+   
+    requestAnimationFrame(animate);
+
+    renderer.render(scene, camera);
+}
+
+
+
+</script>
+</body>
+
+</html>
