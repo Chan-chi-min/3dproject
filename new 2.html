@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <style>
+body {
+display:block;
+background-color:#D3D3D3;
+}
+section{
+background-color:white;
+margin-top:5px;
+width:90%
+}
+article{
+
+margin-left:20px;
+
+}
+#color{
+background-color:black;
+color:white;
+}
+
+</style>
+ <title>hw2</title>
+<body>
+ <header>
+      <h1 align="center" style="background-color:blue;color:white;">小工具</h1>
+     
+    </header>
+<table   border="0"align="center">
+<td width="30%" align="center">
+ <section>
+        <h2 id="color">溫度轉換</h2>
+        <article>
+    
+          <h2><input type="text" id="text"  onkeyup="keyupFunctionOfC()"size="10px" style="font-size:20px">℃ 
+<input type="text" id="text2"  onkeyup="keyupFunctionOfF()" size="10px" style="font-size:20px">℉</h2>
+<button type="button" style="font-size:20px;width:70px;height:40px; "onclick="reset()">清除 </button></br> </br>
+        </article>
+
+      </section>
+
+<script>
+
+function keyupFunctionOfC(){
+
+if(!isNaN(document.getElementById("text").value)){
+if(document.getElementById("text").value=="")
+document.getElementById("text2").value="";
+else{
+var a=document.getElementById("text").value*9/5+32;
+document.getElementById("text2").value=a.toFixed(1);
+}
+}
+
+
+}
+
+function keyupFunctionOfF(){
+
+if(!isNaN(document.getElementById("text2").value)){
+if(document.getElementById("text2").value=="")
+document.getElementById("text").value="";
+else{
+var a=(document.getElementById("text2").value-32)*5/9;
+document.getElementById("text").value=a.toFixed(1);
+}
+}
+
+}
+function reset(){
+document.getElementById("text").value="";
+document.getElementById("text2").value="";
+}
+</script>
+</td>
+<td width="30%" align="center">
+<section>
+        <h2 id="color">碼表</h2>
+        <article>
+    
+<h2 id="demo">0.0秒</h2> 
+
+<button type="button" style="font-size:20px;width:70px;height:40px; "onClick="time()">開始 </button>
+<button type="button"  id="text3" style="font-size:20px;width:70px;height:40px;"onClick="stop()">停止 </button>
+<button type="button"  id="text3" style="font-size:20px;width:70px;height:40px;"onClick="reset1()">重置 </button></br> </br>
+        </article>
+
+      </section>
+	  <script>
+	  var a=0,b=0,myTimer;
+	 function time(){
+	 b++;
+	 if(b==1)
+	 myTimer = setInterval(run, 100)
+	 }
+	  function run(){
+a+=1;
+if(a%10==0)
+ document.getElementById("demo").innerHTML = a/10+".0秒";
+ else
+ document.getElementById("demo").innerHTML = a/10+"秒";
+}
+
+function stop(){
+clearInterval(myTimer);
+b=1;
+}
+
+function reset1(){
+a=0;
+b=0;
+document.getElementById("demo").innerHTML = "0.0秒";
+}
+</script>
+	  </td>
+	<td width="30%" align="center">  
+	<section>
+        <h2 id="color">倒數計時器</h2>
+        <article>
+		<h2><input type="text" id="text6"  size="10px" style="font-size:20px">秒</h2> 
+
+<button type="button" style="font-size:20px;width:140px;height:40px; "onClick="time1()">倒數開始 </button>
+<button type="button"  id="text4" style="font-size:20px;width:70px;height:40px;"onClick="stop()">停止 </button>
+<button type="button"  id="text5" style="font-size:20px;width:70px;height:40px;"onClick="reset1()">重置 </button></br> </br>
+		 </article>
+
+      </section>
+	  <script>
+	  var a=0,b=0,myTimer;
+	 function time1(){
+	
+	 b++;
+	 if(b==1){
+	  a=document.getElementById("text6").value*10;
+	 myTimer = setInterval(run1, 100)
+	 }
+	 }
+	  function run1(){
+	  if(a<=0){
+ alert("時間到");
+ b=0;
+ clearInterval(myTimer);
+ }
+ else{
+a-=1;
+if(a%10==0)
+ document.getElementById("text6").value = a/10+".0";
+ else
+ document.getElementById("text6").value = a/10;
+ }
+}
+
+function stop(){
+clearInterval(myTimer);
+
+b=1;
+}
+
+function reset1(){
+a=0;
+b=0;
+document.getElementById("text6").value = "0.0";
+}
+  </script>
+	  </table>
+</body>
+</html>

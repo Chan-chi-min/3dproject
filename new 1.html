@@ -12,7 +12,8 @@ background-color:#D3D3D3;
 section{
 background-color:white;
 margin-top:5px;
-width:90%
+width:70%
+
 }
 article{
 
@@ -23,11 +24,19 @@ margin-left:20px;
 background-color:black;
 color:white;
 }
+.absolute {
+  position: absolute;
+top: 10%;
+
+ left:75%;
+ right:0%;
+ background-color:white;
+}
 </style>
 
     <title>hw1</title>
   </head>
-  <body>
+  <body id="name">
     <header>
       <h1 align="center" style="background-color:blue;color:white;">語意網hw1</h1>
      
@@ -36,25 +45,25 @@ color:white;
 
     <main>
       <section>
-        <h2 id="color">字體大小與顏色改變</h2>
+        <h2 id="color">個人簡介</h2>
         <article>
-    
-            <h3 style="color:blue">藍色字體 h3大小</h3>
-           <h4 style="color:black">黑色字體 h4大小</h4>
-           <h5 style="color:red">紅色字體 h5大小</h5>
+      <font size="6">姓名:陳棋閔</font><br></br>
+              <font size="5">就讀學校:大同大學</font><br></br>
+           <font size="4">班級:I3B05</font><br></br>
+   
         </article>
 
       </section>
 
       <section>
-        <h2 id="color">紙上原型的圖</h2>
-        <article>
-         <img src="paper.jpg"width="200" height="300">
+        <h2 id="color">個人相片</h2>
+        <article >
+         <img src="paper.jpg"width="120" height="150">
         </article>
       </section>
 	   <section>
-	     <h2 id="color">gif圖</h2>
-		  <img src="https://www.urad.com.tw/wp-content/uploads/2015/08/giphy.gif">
+	     <h2 id="color">興趣</h2>
+		  <img src="https://i2.kknews.cc/SIG=16ramir/19rs0000r8pq4571835p.jpg">
 	    </section>
 		
 		 <section>
@@ -66,13 +75,226 @@ color:white;
 		  <section>
 		 <h2 id="color">資料來源</h2>
 		  <h3>gif:
-		  <a href="https://www.urad.com.tw/wp-content/uploads/2015/08/giphy.gif">google</a></h3>
+		  <a href="https://i2.kknews.cc/SIG=16ramir/19rs0000r8pq4571835p.jpg">google</a></h3>
 		   <h3>影片:
 		  <a href="https://www.youtube.com/watch?v=4I1WgJz_lmA">html5教學</a></h3>
 		 </section>
     </main>
-
+	<div class="absolute" align="center"  >
+<h1>背景顏色改變</h1>
+       
+		<h2><input type="text" id="text7"  size="10px" style="font-size:20px"value="block"></h2> 
+<button type="button" style="font-size:20px;width:140px;height:40px; "onClick="change()">確定</button><br></br>
+<script>
+function change(){
+document.getElementById("name").style="background-color:"+document.getElementById("text7").value;
+}
+</script>
+	</div>
+<div class="absolute" align="center" style="top:35%">
+ <h1>溫度轉換</h1>
+        
+    
+          <h2><input type="text" id="text"  onkeyup="keyupFunctionOfC()"size="10px" style="font-size:20px">℃ 
+<input type="text" id="text2"  onkeyup="keyupFunctionOfF()" size="10px" style="font-size:20px">℉</h2>
+<button type="button" style="font-size:20px;width:70px;height:40px; "onclick="reset()">清除 </button></br> </br>
    
 
+<script>
+
+function keyupFunctionOfC(){
+
+if(!isNaN(document.getElementById("text").value)){
+if(document.getElementById("text").value=="")
+document.getElementById("text2").value="";
+else{
+var a=document.getElementById("text").value*9/5+32;
+document.getElementById("text2").value=a.toFixed(1);
+}
+}
+
+
+}
+
+function keyupFunctionOfF(){
+
+if(!isNaN(document.getElementById("text2").value)){
+if(document.getElementById("text2").value=="")
+document.getElementById("text").value="";
+else{
+var a=(document.getElementById("text2").value-32)*5/9;
+document.getElementById("text").value=a.toFixed(1);
+}
+}
+
+}
+function reset(){
+
+document.getElementById("text").value="";
+document.getElementById("text2").value="";
+}
+ 
+</script>
+</div >
+   <div class="absolute" align="center"style="top:60%"  >
+      <h1>碼表</h1>
+      
+    
+<h2 id="demo">0.0秒</h2> 
+
+<button type="button" style="font-size:20px;width:70px;height:40px; "onClick="time()">開始 </button>
+<button type="button"  style="font-size:20px;width:70px;height:40px;"onClick="stop()">停止 </button>
+<button type="button"   style="font-size:20px;width:70px;height:40px;"onClick="reset1()">重置 </button></br> </br>
+     
+
+   
+	  <script>
+	  var a=0,b=0,myTimer;
+	 function time(){
+	 b++;
+	 if(b==1)
+	 myTimer = setInterval(run, 100);
+	 }
+	  function run(){
+a+=1;
+if(a%10==0)
+ document.getElementById("demo").innerHTML = a/10+".0秒";
+ else
+ document.getElementById("demo").innerHTML = a/10+"秒";
+}
+
+function stop(){
+clearInterval(myTimer);
+b=0;
+}
+
+function reset1(){
+a=0;
+b=0;
+document.getElementById("demo").innerHTML = "0.0秒";
+}
+</script>
+</div>
+  <div class="absolute" align="center"style="top:85%"  >
+<h1>倒數計時器</h1>
+       
+		<h2><input type="text" id="text6"  size="10px" style="font-size:20px"value="0.0">秒</h2> 
+
+<button type="button" style="font-size:20px;width:140px;height:40px; "onClick="time1()">倒數開始 </button>
+<button type="button"  id="text4" style="font-size:20px;width:70px;height:40px;"onClick="stop()">停止 </button>
+<button type="button"  id="text5" style="font-size:20px;width:70px;height:40px;"onClick="reset11()">重置 </button></br> </br>
+	
+
+      
+	  <script>
+	  var a=0,b=0,myTimer;
+	 function time1(){
+	
+	 b++;
+	 if(b==1){
+	  a=document.getElementById("text6").value*10;
+	 myTimer = setInterval(run1, 100)
+	 }
+	 }
+	  function run1(){
+	  if(a<=0){
+ alert("時間到");
+ b=0;
+ clearInterval(myTimer);
+ }
+ else{
+a-=1;
+if(a%10==0)
+ document.getElementById("text6").value = a/10+".0";
+ else
+ document.getElementById("text6").value = a/10;
+ }
+}
+
+function stop(){
+clearInterval(myTimer);
+
+b=1;
+}
+
+function reset11(){
+a=0;
+b=0;
+document.getElementById("text6").value = "0.0";
+}
+
+</script>
+</div>
+  <div class="absolute" align="center"style="top:110%"  >
+<h1>計算機</h1>
+       
+		<h2><input type="text" id="text8"  size="10px" style="font-size:20px"></h2> 
+		<h2 id="demo2">算式:</h2> 
+<h2 id="demo1">答:</h2> 
+<button type="button" style="font-size:20px;width:70px;height:40px; "onClick="add()">+</button>
+<button type="button"  id="text4" style="font-size:20px;width:70px;height:40px;"onClick="less()">-</button>
+<button type="button"  id="text5" style="font-size:20px;width:70px;height:40px;"onClick="multiply()">*</button>
+<button type="button"  id="text4" style="font-size:20px;width:70px;height:40px;"onClick="except()">/</button>
+<button type="button"  id="text4" style="font-size:20px;width:70px;height:40px;"onClick="equal()">=</button></br> </br>
+	<button type="button"  id="text4" style="font-size:20px;width:140px;height:40px;"onClick="reset2()">紀錄清除</button></br> </br>
+<script>
+var ans=0;
+var symbol="";
+c=0;
+function add(){
+run2();
+symbol="+";
+document.getElementById("demo2").innerHTML += c+symbol;
+}
+function less(){
+run2();
+symbol="-";
+document.getElementById("demo2").innerHTML += c+symbol;
+}
+function multiply(){
+run2();
+symbol="*";
+document.getElementById("demo2").innerHTML += c+symbol;
+}
+function except(){
+run2();
+symbol="/";
+document.getElementById("demo2").innerHTML += c+symbol;
+}
+function equal(){
+run2();
+symbol=" = ";
+document.getElementById("demo1").innerHTML = "答:"+ans;
+document.getElementById("demo2").innerHTML += c+symbol;
+}
+function reset2(){
+symbol="";
+ans=0;
+c=0;
+document.getElementById("demo1").innerHTML = "答:";
+document.getElementById("demo2").innerHTML ="算式:";
+}
+function run2(){
+
+if(!isNaN(document.getElementById("text8").value)){
+if(document.getElementById("text8").value!="")
+c=document.getElementById("text8").value;
+if(symbol=="+")
+ans+=c*1;
+else if(symbol=="-")
+ans-=c*1;
+else if(symbol=="*")
+ans*=c*1;
+else if(symbol=="/")
+ans/=c*1;
+else 
+ans=c*1;
+document.getElementById("text8").value="";
+
+}
+}
+
+</script>
+	</div>
   </body>
 </html>
