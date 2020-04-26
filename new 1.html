@@ -63,21 +63,29 @@ top: 10%;
       </section>
 	   <section>
 	     <h2 id="color">興趣</h2>
+		  <article >
 		  <img src="https://i2.kknews.cc/SIG=16ramir/19rs0000r8pq4571835p.jpg">
+		   </article >
 	    </section>
 		
 		 <section>
+		  
 		 <h2 id="color">影片</h2>
+		  <article>
 		<iframe width="560" height="315" src="https://youtube.com/embed/4I1WgJz_lmA" frameborder="0"
                             allow="encrypted-media" allowfullscreen>
                         </iframe>
+						  </article >
 		 </section>
 		  <section>
+		  
 		 <h2 id="color">資料來源</h2>
+		   <article >
 		  <h3>gif:
 		  <a href="https://i2.kknews.cc/SIG=16ramir/19rs0000r8pq4571835p.jpg">google</a></h3>
 		   <h3>影片:
 		  <a href="https://www.youtube.com/watch?v=4I1WgJz_lmA">html5教學</a></h3>
+		    </article >
 		 </section>
     </main>
 	<div class="absolute" align="center"  >
@@ -296,5 +304,58 @@ document.getElementById("text8").value="";
 
 </script>
 	</div>
+	  <section style="height:300px">
+		  
+		 <h2 id="color">小互動</h2>
+		   <article>
+		<div  onmouseover="abc();" onmouseout="mOut();" style="  position:relative;background-color:#D94A38;width:240px;height:240px;float:left;">
+
+<div id="play" style="position:absolute;background-color:#222222;width:60px;height:60px;"></div></div>
+<script>
+var a=0;
+var c;
+function abc(){
+c=setInterval(mOver, 100);
+}
+function mOver() {
+
+console.log(a);
+ document.getElementById("play").style.top=a+"px"
+  document.getElementById("play").style.left=a+"px"
+  document.body.style.cursor = 'pointer';
+ a+=10;
+ if(a>180)
+ a=0;
+
+ 
+}
+
+function mOut() {
+  document.body.style.cursor = 'auto';
+
+ clearInterval(c);
+}
+</script>
+		<div id="color1" style="position:relative;background-color:#000000;width:240px;height:240px;left;20px;float:left;margin-left:30px;">
+		<div style="position:relative;background-color:black;color:white;">區塊顏色:#
+		<input type="text" id="color2"  size="10px" style="font-size:20px" value="000000" onkeyup="colorchange()"></div></div>
+		<script>
+		function colorchange(){
+		 document.getElementById("color1").style.background="#"+document.getElementById("color2").value;
+		}
+			</script>
+			<div  style="position:relative;background-color:#D3D3D3;width:240px;height:240px;float:left;margin-left:30px;">
+			style="<input type="text" id="write1"  size="13px" style="font-size:20px;" value="" onkeyup="writes()">"
+		<div id="write" style="padding:60px">自由修改風格
+		</div></div>
+		<script>
+		function writes(){
+		 document.getElementById("write").style="padding:60px;"+document.getElementById("write1").value;
+		}
+			</script>
+		    </article >
+		 </section>
+		 
+		 
   </body>
 </html>
