@@ -304,58 +304,135 @@ document.getElementById("text8").value="";
 
 </script>
 	</div>
-	  <section style="height:300px">
-		  
-		 <h2 id="color">小互動</h2>
-		   <article>
-		<div  onmouseover="abc();" onmouseout="mOut();" style="  position:relative;background-color:#D94A38;width:240px;height:240px;float:left;">
-
-<div id="play" style="position:absolute;background-color:#222222;width:60px;height:60px;"></div></div>
+	  <section>
+	  <h2 id="color">文字查詢修改功能</h2>
+  </article>	  
+	 <form name="myform" onsubmit="return init()">
+請輸入欲尋找文字：<input id="find1" type="text">
+<button type="button" onClick="find()">尋找</button>
+請輸入欲修改成的文字：<input id="modify1" type="text">
+<button type="button" onClick="modify()">修改</button>
+<button type="button" onClick="Empty()">清空</button>
+<button type="button" onClick="Reply()">回復</button>
+</form></br>	
+  </article>
+      </section>
 <script>
-var a=0;
-var c;
-function abc(){
-c=setInterval(mOver, 100);
+var x;
+var f;
+var change=[];
+var original=[];
+init1();
+
+function init1(){
+
+change[0]=document.getElementsByTagName("h1");
+change[1]=document.getElementsByTagName("h2");
+change[2]=document.getElementsByTagName("h3");
+change[3]=document.getElementsByTagName("p");
+change[4]=document.getElementsByTagName("button");
+for(var i=0;i<5;i++){
+ original[i]=new Array();
+for(var a=0;a<change[i].length;a++){
+
+ original[i][a]=change[i][a].innerHTML;
+
 }
-function mOver() {
-
-console.log(a);
- document.getElementById("play").style.top=a+"px"
-  document.getElementById("play").style.left=a+"px"
-  document.body.style.cursor = 'pointer';
- a+=10;
- if(a>180)
- a=0;
-
- 
+}
+}
+function Reply(){
+for(var i=0;i<5;i++){
+for(var a=0;a<change[i].length;a++){
+change[i][a].innerHTML=original[i][a];
+}
+}
 }
 
-function mOut() {
-  document.body.style.cursor = 'auto';
-
- clearInterval(c);
+function init(){
+return false;
 }
+
+function find(){
+if(document.getElementById("find1").value!=""){
+
+var d=0;
+
+if(x){
+
+for(var i=0;i<5;i++){
+for(var a=0;a<change[i].length;a++){
+ var str=change[i][a].innerHTML;
+ if(f)
+  var c=str.replace("<span style=\"background-color:red;color:black;\">"+f+"</span>",f);
+else
+ var c=str.replace("<span style=\"background-color:yellow;color:black;\">"+x+"</span>",x);
+change[i][a].innerHTML=c;
+
+}
+}
+}
+for(var i=0;i<5;i++){
+for(var a=0;a<change[i].length;a++){
+
+var str=change[i][a].textContent;
+x=document.getElementById("find1").value;
+
+var c=str.replace(x,"<span style=\"background-color:yellow;color:black;\">"+x+"</span>");
+if(c!=change[i][a].textContent){
+d++;
+change[i][a].innerHTML=c;
+}
+}
+}
+alert("有 "+d+" 處符合條件");
+}
+else
+alert("請輸入欲查詢的文字");
+}
+
+function modify(){
+if(document.getElementById("find1").value=="")
+alert("請先輸入想尋找的文字");
+else{
+for(var i=0;i<5;i++){
+for(var a=0;a<change[i].length;a++){
+ var str=change[i][a].innerHTML;
+ f=document.getElementById("modify1").value;
+ var c=str.replace("<span style=\"background-color:yellow;color:black;\">"+x+"</span>","<span style=\"background-color:red;color:black;\">"+f+"</span>");
+change[i][a].innerHTML=c;
+
+}
+}
+}
+
+
+
+}
+
+function Empty(){
+document.getElementById("find1").value="";
+document.getElementById("modify1").value="";
+
+for(var i=0;i<5;i++){
+for(var a=0;a<change[i].length;a++){
+ var str=change[i][a].innerHTML;
+ if(f){
+  var c=str.replace("<span style=\"background-color:red;color:black;\">"+f+"</span>",f);
+  change[i][a].innerHTML=c;
+  
+  }
+ else if(x){
+ var c=str.replace("<span style=\"background-color:yellow;color:black;\">"+x+"</span>",x);
+change[i][a].innerHTML=c;
+}
+}
+}
+x=undefined;
+f=undefined;
+}
+
 </script>
-		<div id="color1" style="position:relative;background-color:#000000;width:240px;height:240px;left;20px;float:left;margin-left:30px;">
-		<div style="position:relative;background-color:black;color:white;">區塊顏色:#
-		<input type="text" id="color2"  size="10px" style="font-size:20px" value="000000" onkeyup="colorchange()"></div></div>
-		<script>
-		function colorchange(){
-		 document.getElementById("color1").style.background="#"+document.getElementById("color2").value;
-		}
-			</script>
-			<div  style="position:relative;background-color:#D3D3D3;width:240px;height:240px;float:left;margin-left:30px;">
-			style="<input type="text" id="write1"  size="13px" style="font-size:20px;" value="" onkeyup="writes()">"
-		<div id="write" style="padding:60px">自由修改風格
-		</div></div>
-		<script>
-		function writes(){
-		 document.getElementById("write").style="padding:60px;"+document.getElementById("write1").value;
-		}
-			</script>
-		    </article >
-		 </section>
-		 
+	 
 		 
   </body>
 </html>
