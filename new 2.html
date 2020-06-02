@@ -52,8 +52,11 @@ xmlhttp.onreadystatechange = function() {
   xmlhttp.open("GET", url, true);	
 xmlhttp.send();
 }
-else
+else{
 document.getElementById("demo").innerHTML = "";
+document.getElementById("de").innerHTML="";
+document.getElementById("de1").innerHTML="";
+}
 }
 function variety() {
   
