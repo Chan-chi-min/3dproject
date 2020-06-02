@@ -1,29 +1,118 @@
-<html> 
-<head> 
-<meta charset=utf-8 /> 
-<title>Create a table</title> 
-<style type="text/css"> 
-body {margin: 30px;} 
-</style>  
-</head><body> 
-<table id="myTable" border="1"> 
-</table><form> 
-<input type="button" onclick="createTable()" value="Create the table"> 
-</form>
-<script>
-function createTable()
-{
-rn = window.prompt("Input number of rows", 1);
-cn = window.prompt("Input number of columns",1);
-  
- for(var r=0;r<parseInt(rn,10);r++)
-  {
-   var x=document.getElementById('myTable').insertRow(r);
-   for(var c=0;c<parseInt(cn,10);c++)  
-    {
-     var y=  x.insertCell(c);
-     y.innerHTML="Row-"+r+" Column-"+c; 
-    }
-   }
+<!DOCTYPE html>
+<html>
+<style>
+table,th,td {
+  border : 1px solid black;
+  border-collapse: collapse;
 }
-</script></body></html>
+th,td {
+  padding: 5px;
+}
+</style>
+<body>
+ <title>活動內容查詢</title>
+<a href="new 1.html">返回主頁面</a>
+<div style="text-align:center; ">
+<select style="font-size:30px;"  onchange="loadDoc(this.value)">
+<option value="0" >選擇想查詢的活動</option>
+　<option value="1" >綜藝活動</option>
+　<option value="2" >競賽活動</option>
+</select>
+
+<h3 id="de"></h3>
+<h3 id="de1"></h3>
+</div> 
+<table id="demo" border='1'></table>
+
+<script>
+var d=10,b=1;
+var myArr;
+function loadDoc(value){
+ var xmlhttp = new XMLHttpRequest();
+ var url;
+if(value!=0){
+  if(value==1) 
+ url= "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=11";//綜藝活動//
+else 
+ url ="https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=13" //競賽活動 //
+
+xmlhttp.onreadystatechange = function() {
+  if (this.readyState == 4 && this.status == 200) {
+     console.log("1 ok");
+   myArr = JSON.parse(this.responseText);
+	document.getElementById("de").innerHTML ="共"+ myArr.length+"筆資料"+
+	"<br></br>顯示<input type='text' id='tex'value='"+d+"'onkeyup='quantity(this.value)' style='font-size:20px' size='1px' >筆資料"+
+	"<br>第<input type='text' id='tex1'value='"+b+"'onkeyup='pages(this.value)' style='font-size:20px' size='1px'>頁";
+	  variety();
+	  
+  }
+};
+
+  
+  xmlhttp.open("GET", url, true);	
+xmlhttp.send();
+}
+else
+document.getElementById("demo").innerHTML = "";
+}
+function variety() {
+  
+var i,x,y;
+d=parseInt(d);
+
+b= parseInt(b);
+x=(b-1)*d;
+y=x+d;
+if(y>myArr.length)
+y=myArr.length;
+
+var x1=x+1;
+document.getElementById("de1").innerHTML ="第"+x1+"到第"+y+"筆資料";
+ console.log("x"+x+" y"+y);
+  var table="<tr><th width='100'>活動名稱</th><th width='100'>地點</th><th>開始時間</th><th>結束時間</th><th>備註</th></tr>";
+  for(i = x; i <y; i++) {
+ 
+   table += "<tr><td>" +
+  myArr[i].title+  "</td><td>"+ 
+  myArr[i].showInfo[0].location+'<br></br>'+myArr[i].showInfo[0].locationName+  "</td><td>"+
+   myArr[i].showInfo[0].time +  "</td><td>"+
+    myArr[i].showInfo[0].endTime +  "</td><td>"+
+	 myArr[i].descriptionFilterHtml+  "</td></tr>";
+  }
+  document.getElementById("demo").innerHTML = table;
+}
+function quantity(a){
+
+d=a;
+b=1;
+document.getElementById("tex1").value=b;
+if(d> myArr.length){
+d= myArr.length;
+document.getElementById("tex").value=d;
+}
+
+if(a!="")
+variety();
+
+}
+function pages(a){
+
+b=a;
+
+if(b*d> myArr.length){
+
+
+b= Math.ceil(myArr.length/d);
+console.log(b);
+document.getElementById("tex1").value=b;
+
+}
+
+if(a!="")
+variety();
+
+}
+</script>
+
+</body>
+</html>
