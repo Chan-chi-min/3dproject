@@ -6,19 +6,34 @@
 <body>
 <div id="demo">
 <script>
-  var service_url = 'https://kgsearch.googleapis.com/v1/entities:search';
-  var params = {
-    'query': '楓之谷',
-    'limit': 10,
-    'indent': true,
-    'key' : 'AIzaSyDzLEBYdSYsn2UbxAtLWjYCbkQCUixeyEw',
-  };
-  $.getJSON(service_url + '?callback=?', params, function(response) {
-    $.each(response.itemListElement, function(i, element) {
-	if(element['result']['detailedDescription'])
-      $('<div>', {text:element['result']['detailedDescription']['url']}).appendTo(document.body);
-    });
-  });
+  var xmlhttp = new XMLHttpRequest();
+ var url;
+
+ url= "https://kgsearch.googleapis.com/v1/entities:search?query=餐廳&key=AIzaSyDzLEBYdSYsn2UbxAtLWjYCbkQCUixeyEw&limit=10&indent=True";//綜藝活動//
+
+xmlhttp.onreadystatechange = function() {
+  if (this.readyState == 4 && this.status == 200) {
+  
+  var myArr = JSON.parse(this.responseText);
+	  variety(myArr);
+	  
+  }
+};
+  function variety(myArr) {
+  
+
+y=myArr['itemListElement'].length;
+
+
+   console.log(y);
+  for(var i = 0; i <y; i++) {
+ var  a= myArr['itemListElement'][i];
+   document.getElementById("demo").innerHTML += a['result']['name']+'<br>';
+  }
+ 
+}
+  xmlhttp.open("GET", url, true);	
+xmlhttp.send();
 </script>
 </body>
 </html>
