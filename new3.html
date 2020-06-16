@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+</head>
+<body>
+<div id="demo">
+<script>
+  var service_url = 'https://kgsearch.googleapis.com/v1/entities:search';
+  var params = {
+    'query': '楓之谷',
+    'limit': 10,
+    'indent': true,
+    'key' : 'AIzaSyDzLEBYdSYsn2UbxAtLWjYCbkQCUixeyEw',
+  };
+  $.getJSON(service_url + '?callback=?', params, function(response) {
+    $.each(response.itemListElement, function(i, element) {
+	if(element['result']['detailedDescription'])
+      $('<div>', {text:element['result']['detailedDescription']['url']}).appendTo(document.body);
+    });
+  });
+</script>
+</body>
+</html>
