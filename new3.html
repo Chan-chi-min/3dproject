@@ -1,39 +1,207 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-</head>
 <body>
-<div id="demo">
+
+<a href="new 1.html">返回主頁面</a>
+ <title>餐廳資訊查詢</title>
+<div style="text-align:center;" value="">
+<h1>餐廳資訊查詢</h1>
+<h3 id="de">讀取中...</h3>
+關鍵字查詢:<input type='text' id='de1'value="" onkeyup="variety()" style='font-size:10px' >
+分類:<select id="de2" style="font-size:15px;" onchange="variety()">
+<option value="">不查詢</option>
+</select>
+簡介:<select id="de3" style="font-size:15px;" onchange="variety()">
+<option value="">不查詢</option>
+<option value="有">有</option>
+<option value="無">無</option>
+</select>
+</div> 
+<table id="demo" border='1'></table>
+
 <script>
   var xmlhttp = new XMLHttpRequest();
  var url;
-
- url= "https://kgsearch.googleapis.com/v1/entities:search?query=餐廳&key=AIzaSyDzLEBYdSYsn2UbxAtLWjYCbkQCUixeyEw&limit=10&indent=True";//綜藝活動//
+var Arr;
+ url= "https://kgsearch.googleapis.com/v1/entities:search?query=餐廳&key=AIzaSyDzLEBYdSYsn2UbxAtLWjYCbkQCUixeyEw&limit=10000&indent=True&languages=zh&languages=zh";
 
 xmlhttp.onreadystatechange = function() {
   if (this.readyState == 4 && this.status == 200) {
   
-  var myArr = JSON.parse(this.responseText);
-	  variety(myArr);
-	  
+   Arr = JSON.parse(this.responseText);
+ document.getElementById("de").innerHTML='共'+Arr['itemListElement'].length+'筆資料';
+	  variety();
+	  load(Arr);
   }
 };
-  function variety(myArr) {
-  
-
-y=myArr['itemListElement'].length;
-
-
-   console.log(y);
-  for(var i = 0; i <y; i++) {
- var  a= myArr['itemListElement'][i];
-   document.getElementById("demo").innerHTML += a['result']['name']+'<br>';
-  }
- 
-}
   xmlhttp.open("GET", url, true);	
 xmlhttp.send();
+
+  function variety() {
+  var myArr=Arr;
+  y=myArr['itemListElement'].length;
+
+if(document.getElementById("de1").value!=""){
+var x2=new Array();
+x2['itemListElement']=new Array();
+var r=0;
+
+for(var i=0; i<myArr['itemListElement'].length;i++){
+ var a=myArr['itemListElement'][i];
+
+		for(var c=0;c< a['result']['name'].length;c++){
+				if(a['result']['name'][c]['@value'].indexOf(document.getElementById("de1").value)  >= 0 ){
+				x2['itemListElement'][r]=a
+				r++;
+				break;
+
+			}
+		}
+
+}
+ myArr=x2;
+ y=r;
+}
+
+
+
+
+if(document.getElementById("de2").value!=""){
+var x=new Array();
+x['itemListElement']=new Array();
+var r=0;
+for(var i=0; i<myArr['itemListElement'].length;i++){
+ var a=myArr['itemListElement'][i];
+   if(a['result']['description']){
+	for(var c=0;c< a['result']['description'].length;c++){
+		if( a['result']['description'][c]['@value'].indexOf(document.getElementById("de2").value)  >= 0 ){
+		x['itemListElement'][r]=a;
+		break;
+		}
+	}
+if(x['itemListElement'][r]){
+r++;
+
+}
+   }
+else if(document.getElementById("de2").value=="無"){
+x['itemListElement'][r]=a;
+r++;
+}
+
+}
+ myArr=x;
+ y=r;
+}
+
+
+if(document.getElementById("de3").value!=""){
+var x1=new Array();
+x1['itemListElement']=new Array();
+var r=0;
+
+for(var i=0; i<myArr['itemListElement'].length;i++){
+ var a=myArr['itemListElement'][i];
+
+   if(document.getElementById("de3").value=="有"&&a['result']['detailedDescription']){
+
+		x1['itemListElement'][r]=a;
+r++;
+	}
+	else if(document.getElementById("de3").value=="無"&&!a['result']['detailedDescription']){
+x1['itemListElement'][r]=a;
+r++;
+}
+}
+
+ myArr=x1;
+ y=r;
+}
+
+  document.getElementById("de").innerHTML='共'+y+'筆資料';
+  var table="<tr><th width='200'>名稱</th><th width='100'>分類</th><th width='800'>簡介</th><th width='100'>詳細內容連結</th></tr>";
+var  a;
+  for(var i = 0; i <y; i++) {
+    table += "<tr><td>" 
+
+	 a= myArr['itemListElement'][i];
+
+	var b="";
+		for(var c=0;c< a['result']['name'].length;c++){
+			if( a['result']['name'][c]['@language']=='zh-TW'){
+				b=a['result']['name'][c]['@value'];
+				break;
+			}
+		b=a['result']['name'][c]['@value'];
+		}
+	table +=b+ "</td><td>";
+   if(a['result']['description']){
+	for(var c=0;c< a['result']['description'].length;c++){
+		if( a['result']['description'][c]['@language']=='zh-TW'){
+			b=a['result']['description'][c]['@value'];
+			break;
+			}
+		b=a['result']['description'][c]['@value'];
+	}
+  table +=b+ "</td><td>";
+   }
+   else 
+	table+= "無</td><td>";
+   if(a['result']['detailedDescription']){
+    for(var c=0;c< a['result']['detailedDescription'].length;c++){
+		if( a['result']['detailedDescription'][c]['inLanguage']=='zh-TW'){
+			b=a['result']['detailedDescription'][c]['articleBody']+"</td><td>"+'<a href="'+a['result']['detailedDescription'][c]['url']+'">詳細內容請點此</a>';
+			break;
+			}
+		b=a['result']['detailedDescription'][c]['articleBody']+"</td><td>"+'<a href="'+a['result']['detailedDescription'][c]['url']+'">詳細內容請點此</a>';
+	}
+	table +=b+ "</td></tr>";
+   }
+   else 
+  table+= "無</td><td>"+"無</td></tr>";
+ 
+  }
+  document.getElementById("demo").innerHTML=table;
+}
+function load(){
+var y=new Array();
+
+for(var i=0;i<Arr['itemListElement'].length;i++){
+	var  a= Arr['itemListElement'][i];
+   if(a['result']['description']){
+	for(var c=0;c< a['result']['description'].length;c++){
+		if( a['result']['description'][c]['@language']=='zh-TW'){
+			b=a['result']['description'][c]['@value'];
+			break;
+			}
+		b=a['result']['description'][c]['@value'];
+	}
+	if(b.indexOf("電影") >= 0 )
+	b="電影";
+	else if(b.indexOf("書")  >= 0 )
+	b="書";
+		else if(b.indexOf("位於")  >= 0 )
+	b="位置";
+
+   }
+   else 
+   b="無";
+   if(!y[b]){
+var index=document.getElementById("de2").options.length;
+if(b=="位置")
+	document.getElementById("de2").options[index]=new Option(b, '位於');
+	else
+		document.getElementById("de2").options[index]=new Option(b, b);
+
+
+
+y[b]=true;
+
+
+}
+}
+}
+
 </script>
 </body>
 </html>
